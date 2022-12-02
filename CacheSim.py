@@ -57,8 +57,6 @@ class fullyAssociativeCacheFifo:
         offsetSize = int(math.log(self.lineSize, 2))
         indexSize = int(math.log(self.size, 2))
         
-        print(binary_string)
-        
         tag = binary_string[:(len(binary_string) - indexSize)]       
         offset = binary_string[(len(binary_string) - offsetSize):]
 
@@ -89,7 +87,7 @@ class fullyAssociativeCacheLru:
         offsetSize = int(math.log(self.lineSize, 2))
         indexSize = int(math.log(self.size, 2))
         
-        print(binary_string)
+     
         
         tag = binary_string[:(len(binary_string) - indexSize)]       
         offset = binary_string[(len(binary_string) - offsetSize):]
@@ -131,7 +129,7 @@ class setAssociativeCacheFifo:
         indexSize = int(math.log(self.size, 2))
         setSize = int(math.log(self.numberOfSets,2))
         
-        print(binary_string)
+        
         
         tag = binary_string[:(len(binary_string) - indexSize)]  
         s = binary_string[(len(binary_string) - indexSize):(len(binary_string) - indexSize + setSize)]     
@@ -172,7 +170,7 @@ class setAssociativeCacheLru:
         indexSize = int(math.log(self.size, 2))
         setSize = int(math.log(self.numberOfSets,2))
         
-        print(binary_string)
+    
         
         tag = binary_string[:(len(binary_string) - indexSize)]  
         s = binary_string[(len(binary_string) - indexSize):(len(binary_string) - indexSize + setSize)]     
@@ -220,7 +218,7 @@ t5 = 0
 
 accessNums = [512,1024, 2048, 4096, 8192]
 
-f = open('read01.trace') # Open file on read mode
+f = open('gcc.trace') # Open file on read mode
 lines = f.read().splitlines() # List with stripped line-breaks
 f.close() # Close file
 
@@ -232,31 +230,26 @@ for line in lines:
     dMC1.access(lineSplit[1][2:])
     end = timer()
     t1 += (end - start)
-    print(end - start)
 
     start = timer()
     dMC2.access(lineSplit[1][2:])
     end = timer()
     t2 += (end - start)
-    print(end - start)
 
     start = timer()
     dMC3.access(lineSplit[1][2:])
     end = timer()
     t3 += (end - start)
-    print(end - start)
 
     start = timer()
     dMC4.access(lineSplit[1][2:])
     end = timer()
     t4 += (end - start)
-    print(end - start)
 
     start = timer()
     dMC5.access(lineSplit[1][2:])
     end = timer()
     t5 += (end - start)
-    print(end - start)
 
 dMC1 = directMappedCache(1024, 64)
 dMC2 = fullyAssociativeCacheFifo(1024, 64)
@@ -283,31 +276,29 @@ for line in lines:
     dMC1.access(lineSplit[1][2:])
     end = timer()
     t1 += (end - start)
-    print(end - start)
 
     start = timer()
     dMC2.access(lineSplit[1][2:])
     end = timer()
     t2 += (end - start)
-    print(end - start)
 
     start = timer()
     dMC3.access(lineSplit[1][2:])
     end = timer()
     t3 += (end - start)
-    print(end - start)
+
 
     start = timer()
     dMC4.access(lineSplit[1][2:])
     end = timer()
     t4 += (end - start)
-    print(end - start)
+
 
     start = timer()
     dMC5.access(lineSplit[1][2:])
     end = timer()
     t5 += (end - start)
-    print(end - start)
+    
 
 dMC1 = directMappedCache(2048, 64)
 dMC2 = fullyAssociativeCacheFifo(2048, 64)
@@ -334,31 +325,30 @@ for line in lines:
     dMC1.access(lineSplit[1][2:])
     end = timer()
     t1 += (end - start)
-    print(end - start)
 
     start = timer()
     dMC2.access(lineSplit[1][2:])
     end = timer()
     t2 += (end - start)
-    print(end - start)
+    
 
     start = timer()
     dMC3.access(lineSplit[1][2:])
     end = timer()
     t3 += (end - start)
-    print(end - start)
+    
 
     start = timer()
     dMC4.access(lineSplit[1][2:])
     end = timer()
     t4 += (end - start)
-    print(end - start)
+    
 
     start = timer()
     dMC5.access(lineSplit[1][2:])
     end = timer()
     t5 += (end - start)
-    print(end - start)
+    
 
 dMC1 = directMappedCache(4096, 64)
 dMC2 = fullyAssociativeCacheFifo(4096, 64)
@@ -385,31 +375,31 @@ for line in lines:
     dMC1.access(lineSplit[1][2:])
     end = timer()
     t1 += (end - start)
-    print(end - start)
+    
 
     start = timer()
     dMC2.access(lineSplit[1][2:])
     end = timer()
     t2 += (end - start)
-    print(end - start)
+    
 
     start = timer()
     dMC3.access(lineSplit[1][2:])
     end = timer()
     t3 += (end - start)
-    print(end - start)
+    
 
     start = timer()
     dMC4.access(lineSplit[1][2:])
     end = timer()
     t4 += (end - start)
-    print(end - start)
+    
 
     start = timer()
     dMC5.access(lineSplit[1][2:])
     end = timer()
     t5 += (end - start)
-    print(end - start)
+    
 
 dMC1 = directMappedCache(8192, 64)
 dMC2 = fullyAssociativeCacheFifo(8192, 64)
@@ -436,31 +426,30 @@ for line in lines:
     dMC1.access(lineSplit[1][2:])
     end = timer()
     t1 += (end - start)
-    print(end - start)
+    
 
     start = timer()
     dMC2.access(lineSplit[1][2:])
     end = timer()
     t2 += (end - start)
-    print(end - start)
+    
 
     start = timer()
     dMC3.access(lineSplit[1][2:])
     end = timer()
     t3 += (end - start)
-    print(end - start)
+
 
     start = timer()
     dMC4.access(lineSplit[1][2:])
     end = timer()
     t4 += (end - start)
-    print(end - start)
+
 
     start = timer()
     dMC5.access(lineSplit[1][2:])
     end = timer()
     t5 += (end - start)
-    print(end - start)
 
 
 dMC1Times.append(t1)
@@ -478,6 +467,8 @@ t5 = 0
 names = ['Direct Mapped', 'Fully Associative Fifo', 'Fully Associative Lru', 'Set Associative Fifo', 'Set Associative Lru']
 
 plt.figure()
+x1,x2,y1,y2 = plt.axis()
+plt.axis((x1,x2,0,8))
 
 plt.subplot(321)
 plt.plot(accessNums, dMC1Times)
