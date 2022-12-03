@@ -15,6 +15,7 @@ class tableLine:
 #------------------------------------------------Direct Mapped Cache-------------------------------------------------------#
 class directMappedCache:
     def __init__(self, size, lineSize):
+        self.hit = 0
         self.size = size
         self.lineSize = lineSize
         self.linesPerSet = 1
@@ -24,7 +25,7 @@ class directMappedCache:
             self.table.append(tableLine(i, i, None, 0))
 
     def access(self,address):
-        binary_string = bin(int(address,16))[2:].zfill(29)
+        binary_string = bin(int(address,16))[2:].zfill(32)
         offsetSize = int(math.log(self.lineSize, 2))
         indexSize = int(math.log(self.size, 2))
         lineSize = int(math.log(self.numberOfLines, 2))
@@ -38,6 +39,7 @@ class directMappedCache:
 
         if self.table[line].tag == tag:
             self.table[line].hit()
+            self.hit += 1
             return 'Hit'
         else:
             self.table[line].setTag(tag)
@@ -45,6 +47,7 @@ class directMappedCache:
 #------------------------------------------------Fully Associative Fifo Cache-------------------------------------------------------#
 class fullyAssociativeCacheFifo:
     def __init__(self, size, lineSize):
+        self.hit = 0
         self.size = size
         self.lineSize = lineSize
         self.numberOfLines = size // lineSize
@@ -53,7 +56,7 @@ class fullyAssociativeCacheFifo:
             self.table.append(tableLine(i, 0, None, 0))
 
     def access(self,address):
-        binary_string = bin(int(address,16))[2:].zfill(29)
+        binary_string = bin(int(address,16))[2:].zfill(32)
         offsetSize = int(math.log(self.lineSize, 2))
         indexSize = int(math.log(self.size, 2))
         
@@ -65,6 +68,7 @@ class fullyAssociativeCacheFifo:
         for l in self.table:
             if l.tag == tag:
                 l.hit()
+                self.hit += 1
                 return 'Hit'
         for l in self.table:
             if l.tag is None:
@@ -75,6 +79,7 @@ class fullyAssociativeCacheFifo:
 #------------------------------------------------Fully Associative Lru Cache-------------------------------------------------------#
 class fullyAssociativeCacheLru:
     def __init__(self, size, lineSize):
+        self.hit = 0
         self.size = size
         self.lineSize = lineSize
         self.numberOfLines = size // lineSize
@@ -83,7 +88,7 @@ class fullyAssociativeCacheLru:
             self.table.append(tableLine(i, 0, None, 0))
 
     def access(self,address):
-        binary_string = bin(int(address,16))[2:].zfill(29)
+        binary_string = bin(int(address,16))[2:].zfill(32)
         offsetSize = int(math.log(self.lineSize, 2))
         indexSize = int(math.log(self.size, 2))
         
@@ -100,6 +105,7 @@ class fullyAssociativeCacheLru:
             l = self.table[i]
             if l.tag == tag:
                 l.hit()
+                self.hit += 1
                 return 'Hit'
             if l.counter < lowestCount:
                 lowestCount = l.counter
@@ -113,6 +119,7 @@ class fullyAssociativeCacheLru:
 #------------------------------------------------Set Associative Fifo Cache-------------------------------------------------------#
 class setAssociativeCacheFifo:
     def __init__(self, size, lineSize, linesPerSet):
+        self.hit = 0
         self.size = size
         self.lineSize = lineSize
         self.linesPerSet = linesPerSet
@@ -124,7 +131,7 @@ class setAssociativeCacheFifo:
             self.table.append(tableLine(i, (i//self.linesPerSet), None, 0))
 
     def access(self,address):
-        binary_string = bin(int(address,16))[2:].zfill(29)
+        binary_string = bin(int(address,16))[2:].zfill(32)
         offsetSize = int(math.log(self.lineSize, 2))
         indexSize = int(math.log(self.size, 2))
         setSize = int(math.log(self.numberOfSets,2))
@@ -143,17 +150,19 @@ class setAssociativeCacheFifo:
         for i in range(self.linesPerSet):
             if self.table[startingIndex + i].tag == tag:
                 self.table[startingIndex + i].hit()
+                self.hit += 1
                 return 'Hit'     
-        for l in self.table:
-            if l.tag is None:
-                l.setTag(tag)
+        for i in range(self.linesPerSet):
+            if self.table[startingIndex + i].tag is None:
+                self.table[startingIndex + i].setTag(tag)
                 return 'Miss'
-        self.table[0].setTag(tag)
+        self.table[startingIndex].setTag(tag)
         return 'Miss' 
 
 #------------------------------------------------Set Associative Fifo Cache-------------------------------------------------------#
 class setAssociativeCacheLru:
     def __init__(self, size, lineSize, linesPerSet):
+        self.hit = 0
         self.size = size
         self.lineSize = lineSize
         self.linesPerSet = linesPerSet
@@ -165,7 +174,7 @@ class setAssociativeCacheLru:
             self.table.append(tableLine(i, (i//self.linesPerSet), None, 0))
 
     def access(self,address):
-        binary_string = bin(int(address,16))[2:].zfill(29)
+        binary_string = bin(int(address,16))[2:].zfill(32)
         offsetSize = int(math.log(self.lineSize, 2))
         indexSize = int(math.log(self.size, 2))
         setSize = int(math.log(self.numberOfSets,2))
@@ -174,7 +183,7 @@ class setAssociativeCacheLru:
         
         tag = binary_string[:(len(binary_string) - indexSize)]  
         s = binary_string[(len(binary_string) - indexSize):(len(binary_string) - indexSize + setSize)]     
-        offset = binary_string[(len(binary_string) - indexSize + setSize):]
+        offset = binary_string[(len(binary_string) - setSize):]
 
         tag = int(tag, 2)
         s = int(s, 2)
@@ -187,22 +196,19 @@ class setAssociativeCacheLru:
         for i in range(self.linesPerSet):
             if self.table[startingIndex + i].tag == tag:
                 self.table[startingIndex + i].hit()
+                self.hit += 1
                 return 'Hit'     
             if self.table[startingIndex + i].counter < lowestCount:
                 lowestCount = self.table[startingIndex + i].counter
                 lowestCountIndex = i
-        for l in self.table:
-            if l.tag is None:
-                l.setTag(tag)
+        for i in range(self.linesPerSet):
+            if self.table[startingIndex + i].tag is None:
+                self.table[startingIndex + i].setTag(tag)
                 return 'Miss'
-        self.table[lowestCountIndex].setTag(tag)
+        self.table[startingIndex + lowestCountIndex].setTag(tag)
         return 'Miss' 
 
-dMC1 = directMappedCache(512, 64)
-dMC2 = fullyAssociativeCacheFifo(512, 64)
-dMC3 = fullyAssociativeCacheLru(512, 64)
-dMC4 = setAssociativeCacheFifo(512, 64, 2)
-dMC5 = setAssociativeCacheLru(512, 64, 2)
+c = 0
 
 dMC1Times = []
 dMC2Times = []
@@ -210,58 +216,32 @@ dMC3Times = []
 dMC4Times = []
 dMC5Times = []
 
-t1 = 0
-t2 = 0
-t3 = 0
-t4 = 0
-t5 = 0
+directMiss = []
+twoMiss= []
+fourmiss = []
+eightMiss = []
 
-accessNums = [512,1024, 2048, 4096, 8192]
+hr1 = []
+hr2 = []
+hr3 = []
+hr4 = []
+hr5 = []
+
+accessNums = [256, 512, 1024, 2048]
+
+associativityNums = ['One-Way', 'Two-Way', 'Four-Way', 'Eight-Way']
 
 f = open('gcc.trace') # Open file on read mode
 lines = f.read().splitlines() # List with stripped line-breaks
 f.close() # Close file
 
-for line in lines:
-    if len(line) < 2:
-        continue
-    lineSplit = line.split()
-    start = timer()
-    dMC1.access(lineSplit[1][2:])
-    end = timer()
-    t1 += (end - start)
 
-    start = timer()
-    dMC2.access(lineSplit[1][2:])
-    end = timer()
-    t2 += (end - start)
 
-    start = timer()
-    dMC3.access(lineSplit[1][2:])
-    end = timer()
-    t3 += (end - start)
-
-    start = timer()
-    dMC4.access(lineSplit[1][2:])
-    end = timer()
-    t4 += (end - start)
-
-    start = timer()
-    dMC5.access(lineSplit[1][2:])
-    end = timer()
-    t5 += (end - start)
-
-dMC1 = directMappedCache(1024, 64)
-dMC2 = fullyAssociativeCacheFifo(1024, 64)
-dMC3 = fullyAssociativeCacheLru(1024, 64)
-dMC4 = setAssociativeCacheFifo(1024, 64, 2)
-dMC5 = setAssociativeCacheLru(1024, 64, 2)
-
-dMC1Times.append(t1)
-dMC2Times.append(t2)
-dMC3Times.append(t3)
-dMC4Times.append(t4)
-dMC5Times.append(t5)
+dMC1 = directMappedCache(256, 32)
+dMC2 = fullyAssociativeCacheFifo(256, 32)
+dMC3 = fullyAssociativeCacheLru(256, 32)
+dMC4 = setAssociativeCacheFifo(256, 32, 2)
+dMC5 = setAssociativeCacheLru(256, 32, 2)
 
 t1 = 0
 t2 = 0
@@ -270,55 +250,7 @@ t4 = 0
 t5 = 0
 
 for line in lines:
-    lineSplit = line.split()
-
-    start = timer()
-    dMC1.access(lineSplit[1][2:])
-    end = timer()
-    t1 += (end - start)
-
-    start = timer()
-    dMC2.access(lineSplit[1][2:])
-    end = timer()
-    t2 += (end - start)
-
-    start = timer()
-    dMC3.access(lineSplit[1][2:])
-    end = timer()
-    t3 += (end - start)
-
-
-    start = timer()
-    dMC4.access(lineSplit[1][2:])
-    end = timer()
-    t4 += (end - start)
-
-
-    start = timer()
-    dMC5.access(lineSplit[1][2:])
-    end = timer()
-    t5 += (end - start)
-    
-
-dMC1 = directMappedCache(2048, 64)
-dMC2 = fullyAssociativeCacheFifo(2048, 64)
-dMC3 = fullyAssociativeCacheLru(2048, 64)
-dMC4 = setAssociativeCacheFifo(2048, 64, 2)
-dMC5 = setAssociativeCacheLru(2048, 64, 2)
-
-dMC1Times.append(t1)
-dMC2Times.append(t2)
-dMC3Times.append(t3)
-dMC4Times.append(t4)
-dMC5Times.append(t5)
-
-t1 = 0
-t2 = 0
-t3 = 0
-t4 = 0
-t5 = 0
-
-for line in lines:
+    c += 1
     lineSplit = line.split()
 
     start = timer()
@@ -348,13 +280,19 @@ for line in lines:
     dMC5.access(lineSplit[1][2:])
     end = timer()
     t5 += (end - start)
+
+hr1.append(dMC1.hit / c)
+hr2.append(dMC2.hit / c)
+hr3.append(dMC3.hit / c)
+hr4.append(dMC4.hit / c)
+hr5.append(dMC5.hit / c)
     
 
-dMC1 = directMappedCache(4096, 64)
-dMC2 = fullyAssociativeCacheFifo(4096, 64)
-dMC3 = fullyAssociativeCacheLru(4096, 64)
-dMC4 = setAssociativeCacheFifo(4096, 64, 2)
-dMC5 = setAssociativeCacheLru(4096, 64, 2)
+dMC1 = directMappedCache(512, 32)
+dMC2 = fullyAssociativeCacheFifo(512, 32)
+dMC3 = fullyAssociativeCacheLru(512, 32)
+dMC4 = setAssociativeCacheFifo(512, 32, 2)
+dMC5 = setAssociativeCacheLru(512, 32, 2)
 
 dMC1Times.append(t1)
 dMC2Times.append(t2)
@@ -399,13 +337,18 @@ for line in lines:
     dMC5.access(lineSplit[1][2:])
     end = timer()
     t5 += (end - start)
-    
 
-dMC1 = directMappedCache(8192, 64)
-dMC2 = fullyAssociativeCacheFifo(8192, 64)
-dMC3 = fullyAssociativeCacheLru(8192, 64)
-dMC4 = setAssociativeCacheFifo(8192, 64, 2)
-dMC5 = setAssociativeCacheLru(8192, 64, 2)
+hr1.append(dMC1.hit / c)
+hr2.append(dMC2.hit / c)
+hr3.append(dMC3.hit / c)
+hr4.append(dMC4.hit / c)
+hr5.append(dMC5.hit / c)
+
+dMC1 = directMappedCache(1024, 32)
+dMC2 = fullyAssociativeCacheFifo(1024, 32)
+dMC3 = fullyAssociativeCacheLru(1024, 32)
+dMC4 = setAssociativeCacheFifo(1024, 32, 2)
+dMC5 = setAssociativeCacheLru(1024, 32, 2)
 
 dMC1Times.append(t1)
 dMC2Times.append(t2)
@@ -451,6 +394,11 @@ for line in lines:
     end = timer()
     t5 += (end - start)
 
+hr1.append(dMC1.hit / c)
+hr2.append(dMC2.hit / c)
+hr3.append(dMC3.hit / c)
+hr4.append(dMC4.hit / c)
+hr5.append(dMC5.hit / c)
 
 dMC1Times.append(t1)
 dMC2Times.append(t2)
@@ -463,22 +411,207 @@ t2 = 0
 t3 = 0
 t4 = 0
 t5 = 0
+
+
+
+dMC1 = directMappedCache(2048, 32)
+dMC2 = fullyAssociativeCacheFifo(2048, 32)
+dMC3 = fullyAssociativeCacheLru(2048, 32)
+dMC4 = setAssociativeCacheFifo(2048, 32, 2)
+dMC5 = setAssociativeCacheLru(2048, 32, 2)
+
+for line in lines:
+    lineSplit = line.split()
+
+    start = timer()
+    dMC1.access(lineSplit[1][2:])
+    end = timer()
+    t1 += (end - start)
+    
+
+    start = timer()
+    dMC2.access(lineSplit[1][2:])
+    end = timer()
+    t2 += (end - start)
+    
+
+    start = timer()
+    dMC3.access(lineSplit[1][2:])
+    end = timer()
+    t3 += (end - start)
+    
+
+    start = timer()
+    dMC4.access(lineSplit[1][2:])
+    end = timer()
+    t4 += (end - start)
+    
+
+    start = timer()
+    dMC5.access(lineSplit[1][2:])
+    end = timer()
+    t5 += (end - start)
+    
+hr1.append(dMC1.hit / c)
+hr2.append(dMC2.hit / c)
+hr3.append(dMC3.hit / c)
+hr4.append(dMC4.hit / c)
+hr5.append(dMC5.hit / c)
+
+dMC1Times.append(t1)
+dMC2Times.append(t2)
+dMC3Times.append(t3)
+dMC4Times.append(t4)
+dMC5Times.append(t5)
+
+
+
+
+
+
+
+dMC1 = directMappedCache(512, 32)
+dMC2 = setAssociativeCacheFifo(512, 32, 2)
+dMC3 = setAssociativeCacheFifo(512, 32, 4)
+dMC4 = setAssociativeCacheFifo(512, 32, 8)
+
+for line in lines:
+    lineSplit = line.split()
+    dMC1.access(lineSplit[1][2:])
+    dMC2.access(lineSplit[1][2:])
+    dMC3.access(lineSplit[1][2:])
+    dMC4.access(lineSplit[1][2:])
+
+directMiss.append(1 - dMC1.hit / c)
+twoMiss.append(1 - dMC2.hit / c)
+fourmiss.append(1 - dMC3.hit / c)
+eightMiss.append(1 - dMC4.hit / c)
+dMC1 = directMappedCache(1024, 32)
+dMC2 = setAssociativeCacheFifo(1024, 32, 2)
+dMC3 = setAssociativeCacheFifo(1024, 32, 4)
+dMC4 = setAssociativeCacheFifo(1024, 32, 8)
+
+for line in lines:
+    lineSplit = line.split()
+    dMC1.access(lineSplit[1][2:])
+    dMC2.access(lineSplit[1][2:])
+    dMC3.access(lineSplit[1][2:])
+    dMC4.access(lineSplit[1][2:])
+
+directMiss.append(1 - dMC1.hit / c)
+twoMiss.append(1 - dMC2.hit / c)
+fourmiss.append(1 - dMC3.hit / c)
+eightMiss.append(1 - dMC4.hit / c)
+dMC1 = directMappedCache(2048, 32)
+dMC2 = setAssociativeCacheFifo(2048, 32, 2)
+dMC3 = setAssociativeCacheFifo(2048, 32, 4)
+dMC4 = setAssociativeCacheFifo(2048, 32, 8)
+
+for line in lines:
+    lineSplit = line.split()
+    dMC1.access(lineSplit[1][2:])
+    dMC2.access(lineSplit[1][2:])
+    dMC3.access(lineSplit[1][2:])
+    dMC4.access(lineSplit[1][2:])
+
+directMiss.append(1 - dMC1.hit / c)
+twoMiss.append(1 - dMC2.hit / c)
+fourmiss.append(1 - dMC3.hit / c)
+eightMiss.append(1 - dMC4.hit / c)
+
+
 
 names = ['Direct Mapped', 'Fully Associative Fifo', 'Fully Associative Lru', 'Set Associative Fifo', 'Set Associative Lru']
 
-plt.figure()
-x1,x2,y1,y2 = plt.axis()
-plt.axis((x1,x2,0,8))
+fig = plt.figure(0, figsize=(2, 6))
+fig.tight_layout(pad=5.0)
 
-plt.subplot(321)
-plt.plot(accessNums, dMC1Times)
-plt.subplot(322)
-plt.plot(accessNums, dMC2Times)
-plt.subplot(323)
-plt.plot(accessNums, dMC3Times)
-plt.subplot(324)
-plt.plot(accessNums, dMC2Times)
-plt.subplot(325)
-plt.plot(accessNums, dMC3Times)
-plt.suptitle('Categorical Plotting')
+ax1 = fig.add_subplot(321)
+ax2 = fig.add_subplot(322)
+ax3 = fig.add_subplot(323)
+ax4 = fig.add_subplot(324)
+ax5 = fig.add_subplot(325)
+
+ax1.set_xlabel("Cache Size (Bytes)")
+ax1.set_ylabel("Hit Rate (Hits / Total Accesses)")
+ax2.set_xlabel("Cache Size (Bytes)")
+ax2.set_ylabel("Hit Rate (Hits / Total Accesses)")
+ax3.set_xlabel("Cache Size (Bytes)")
+ax3.set_ylabel("Hit Rate (Hits / Total Accesses)")
+ax4.set_xlabel("Cache Size (Bytes)")
+ax4.set_ylabel("Hit Rate (Hits / Total Accesses)")
+ax5.set_xlabel("Cache Size (Bytes)")
+ax5.set_ylabel("Hit Rate (Hits / Total Accesses)")
+
+ax1.set_title('Direct Mapped', y=1.0, pad=-14)
+ax2.set_title('Fully Associative (FIFO)', y=1.0, pad=-14)
+ax3.set_title('Fully Associative (LRU)', y=1.0, pad=-14)
+ax4.set_title('Set Associative (FIFO)', y=1.0, pad=-14)
+ax5.set_title('Set Associative (LRU)', y=1.0, pad=-14)
+
+ax1.plot(accessNums, hr1)
+ax2.plot(accessNums, hr2)
+ax3.plot(accessNums, hr3)
+ax4.plot(accessNums, hr4)
+ax5.plot(accessNums, hr5)
+
+plt.suptitle('Hit Rate vs Cache Size')
+
+
+
+#------------------------------------------------------#
+fig = plt.figure(1, figsize=(2, 6))
+fig.tight_layout(pad=5.0)
+
+ax1 = fig.add_subplot(321)
+ax2 = fig.add_subplot(322)
+ax3 = fig.add_subplot(323)
+ax4 = fig.add_subplot(324)
+ax5 = fig.add_subplot(325)
+
+ax1.set_xlabel("Cache Size (Bytes)")
+ax1.set_ylabel("Total Access Time (Seconds)")
+ax2.set_xlabel("Cache Size (Bytes)")
+ax2.set_ylabel("Total Access Time (Seconds)")
+ax3.set_xlabel("Cache Size (Bytes)")
+ax3.set_ylabel("Total Access Time (Seconds)")
+ax4.set_xlabel("Cache Size (Bytes)")
+ax4.set_ylabel("Total Access Time (Seconds)")
+ax5.set_xlabel("Cache Size (Bytes)")
+ax5.set_ylabel("Total Access Time (Seconds)")
+
+ax1.set_title('Direct Mapped', y=1.0, pad=-14)
+ax2.set_title('Fully Associative (FIFO)', y=1.0, pad=-14)
+ax3.set_title('Fully Associative (LRU)', y=1.0, pad=-14)
+ax4.set_title('Set Associative (FIFO)', y=1.0, pad=-14)
+ax5.set_title('Set Associative (LRU)', y=1.0, pad=-14)
+
+
+ax1.plot(accessNums, dMC1Times)
+ax2.plot(accessNums, dMC2Times)
+ax3.plot(accessNums, dMC3Times)
+ax4.plot(accessNums, dMC4Times)
+ax5.plot(accessNums, dMC5Times)
+
+plt.suptitle('Total Access Time vs Cache Size')
+
+#------------------------------------------------------#
+plt.figure(2, figsize=(2, 6))
+
+row1 = [directMiss[0],twoMiss[0], fourmiss[0], eightMiss[0]]
+row2 = [directMiss[1],twoMiss[1], fourmiss[1], eightMiss[1]]
+row3 = [directMiss[2],twoMiss[2], fourmiss[2], eightMiss[2]]
+
+plt.plot(associativityNums, row1, label="512")
+plt.plot(associativityNums, row2, label="1024")
+plt.plot(associativityNums, row3, label="2048")
+
+plt.legend()
+
+
+plt.ylabel('Miss Rate (1 - hits / total accesses)')
+plt.xlabel('Associativity')
+
+plt.suptitle('Miss Rate vs Associativity')
+
 plt.show()
