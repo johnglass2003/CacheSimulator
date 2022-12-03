@@ -555,6 +555,12 @@ ax3.plot(accessNums, hr3)
 ax4.plot(accessNums, hr4)
 ax5.plot(accessNums, hr5)
 
+print(hr1)
+print(hr2)
+print(hr3)
+print(hr4)
+print(hr5)
+
 plt.suptitle('Hit Rate vs Cache Size')
 
 
@@ -593,6 +599,12 @@ ax3.plot(accessNums, dMC3Times)
 ax4.plot(accessNums, dMC4Times)
 ax5.plot(accessNums, dMC5Times)
 
+print(dMC1Times)
+print(dMC2Times)
+print(dMC3Times)
+print(dMC4Times)
+print(dMC5Times)
+
 plt.suptitle('Total Access Time vs Cache Size')
 
 #------------------------------------------------------#
@@ -605,6 +617,10 @@ row3 = [directMiss[2],twoMiss[2], fourmiss[2], eightMiss[2]]
 plt.plot(associativityNums, row1, label="512")
 plt.plot(associativityNums, row2, label="1024")
 plt.plot(associativityNums, row3, label="2048")
+
+print(row1)
+print(row2)
+print(row3)
 
 plt.legend()
 
