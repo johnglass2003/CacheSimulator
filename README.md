@@ -2,7 +2,17 @@
 Simulation for Cache Performance
 John Glass Cache Simulator
 
-This Cache Simulator has been made using Python including timeit and matplotlib.pyplot
+This Cache Simulator has been made using Python including **timeit** and **matplotlib.pyplot** (These are necessary to run so please run 
+python -m pip install -U pip
+python -m pip install -U matplotlib
+in a command line to run this simulation
+).
+
+gcc.trace is the file being opened by default, you may change this within the code as long as the file is in the same location as the simulation.
+
+Once run, the built in tests will execute producing plots for Hit Rate vs Cache Size, Total Access Time vs Cache Size,
+and Miss Rate vs Associativity. The data used to create the graphs collected from the tests will be output in array form to
+the terminal.
 
 (Fifo means First In First Out and Lru means Least Recently Used)
 
@@ -18,7 +28,6 @@ and the line's counter is increased.
 
 The Miss handling is dependant on the Cache Type.
 
-PyPlot is implemented after the tests are run and the data for the plots is collected. I have implemented Hit Rate vs Cache Size, Total Access Time vs Cache Size,
-and Miss Rate vs Associativity
+PyPlot is implemented after the tests are run and the data for the plots is collected.
 
 Thank You!
