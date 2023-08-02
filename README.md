@@ -5,8 +5,7 @@ John Glass Cache Simulator
 This Cache Simulator has been made using Python including **timeit** and **matplotlib.pyplot** (These are necessary to run so please run 
 python -m pip install -U pip
 python -m pip install -U matplotlib
-in a command line to run this simulation
-).
+in a command line to run this simulation).
 
 gcc.trace is the file being opened by default, you may change this within the code as long as the file is in the same location as the simulation.
 
